@@ -130,9 +130,28 @@ Reserved Notation "st '=[' c ']=>' st' '/' s"
 
 Inductive ceval : com -> state -> result -> state -> Prop :=
   | E_Skip : forall st,
-      st =[ CSkip ]=> st / SContinue
-  (* FILL IN HERE *)
-  (* REMPLIR ICI *)
+      st =[CSkip]=> st / SContinue
+  | E_Break : forall st,
+      st =[CBreak]=> st / SBreak
+  | E_Asgn  : forall st a n x,
+      aeval st a = n ->
+      st =[ x := a ]=> (x !-> n ; st) / SContinue
+  | E_IfTrue : forall st st' s' b c1 c2,
+      beval st b = true ->
+      st =[ c1 ]=> st' / s'->
+      st =[ if b then c1 else c2 end]=> st' / s'
+  | E_IfFalse : forall st st' s' b c1 c2,
+      beval st b = false ->
+      st =[ c2 ]=> st' / s'->
+      st =[ if b then c1 else c2 end]=> st' / s'
+  | E_Loop_Continue : forall st st' st'' s' c,
+      st =[c]=> st' / SContinue->
+      st' =[ loop c endloop ]=> st'' / s' ->
+      st  =[ loop c endloop ]=> st'' / s'
+  | E_Loop_Break : forall st st' c,
+      st =[c]=> st' / SBreak->
+      st =[ loop c endloop ]=> st' / SContinue
+
 
   where "st '=[' c ']=>' st' '/' s" := (ceval c st s st').
 
