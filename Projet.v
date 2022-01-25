@@ -136,6 +136,13 @@ Inductive ceval : com -> state -> result -> state -> Prop :=
   | E_Asgn  : forall st a n x,
       aeval st a = n ->
       st =[ x := a ]=> (x !-> n ; st) / SContinue
+  | E_Seq_Continue : forall c1 c2 st st' st'' s',
+      st  =[ c1 ]=> st' / SContinue ->
+      st' =[ c2 ]=> st'' / s'->
+      st  =[ c1 ; c2 ]=> st'' / s'
+  | E_Seq_Break : forall c1 c2 st st',
+      st  =[ c1 ]=> st' / SBreak ->
+      st  =[ c1 ; c2 ]=> st' / SBreak
   | E_IfTrue : forall st st' s' b c1 c2,
       beval st b = true ->
       st =[ c1 ]=> st' / s'->
@@ -161,7 +168,11 @@ Theorem break_ignore : forall c st st' s,
      st =[ break; c ]=> st' / s ->
      st = st'.
 Proof.
-    (* FILL IN HERE *) Admitted. 
+  intros.
+  inversion H; subst.
+  - inversion H2.
+  - inversion H5. reflexivity.
+Qed. 
 
 
 Theorem loop_continue : forall c st st' s,
