@@ -175,11 +175,18 @@ Proof.
 Qed. 
 
 
+
 Theorem loop_continue : forall c st st' s,
   st =[ loop c endloop ]=> st' / s ->
   s = SContinue.
 Proof.
-    (* FILL IN HERE *) Admitted. 
+  intros c st st' r H.
+  remember <{loop c endloop}> as p.
+  revert c Heqp.
+  induction H; intros; subst; try discriminate.
+  - apply (IHceval2 c). reflexivity.
+  - reflexivity.
+Qed. 
 
 
 Theorem while_stops_on_break : forall c st st',
