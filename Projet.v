@@ -180,7 +180,7 @@ Theorem loop_continue : forall c st st' s,
   st =[ loop c endloop ]=> st' / s ->
   s = SContinue.
 Proof.
-  intros c st st' r H.
+  intros.
   remember <{loop c endloop}> as p.
   revert c Heqp.
   induction H; intros; subst; try discriminate.
@@ -193,7 +193,9 @@ Theorem while_stops_on_break : forall c st st',
   st =[ c ]=> st' / SBreak ->
   st =[ loop c endloop ]=> st' / SContinue.
 Proof.
-    (* FILL IN HERE *) Admitted. 
+  intros.
+  inversion H; subst; apply E_Loop_Break; assumption.
+Qed.
 
 
 
