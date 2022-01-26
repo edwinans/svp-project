@@ -108,6 +108,10 @@ Reserved Notation "st '=[' c ']=>' st' '/' s"
       that we also propagate the signal from the execution of
       whichever branch was taken.
 
+
+(** [] *)
+
+
     - If the command is a sequence [c1 ; c2], we first execute
       [c1].  If this yields a [SBreak], we skip the execution of [c2]
       and propagate the [SBreak] signal to the surrounding context;
@@ -182,10 +186,7 @@ Theorem loop_continue : forall c st st' s,
 Proof.
   intros.
   remember <{loop c endloop}> as p.
-  revert c Heqp.
-  induction H; intros; subst; try discriminate.
-  - apply (IHceval2 c). reflexivity.
-  - reflexivity.
+  induction H; auto; try discriminate.
 Qed. 
 
 
@@ -217,18 +218,18 @@ Qed.
 
 (** [] *)
 
+
 (** **** Exercise: 3 stars, advanced, optional (while_break_true) *)
 Theorem while_break_true : forall c st st',
   st =[ loop c endloop ]=> st' / SContinue ->
   exists st'', st'' =[ c ]=> st' / SBreak.
 Proof.
   intros.
-  remember <{loop c endloop}> as p.
+  remember <{loop c endloop}> as p.      
   induction H; try discriminate; auto.
   - inversion Heqp. subst. exists st. apply H. 
 Qed.
 
-(** [] *)
 
 (** **** Exercise: 4 stars, advanced, optional (ceval_deterministic) *)
 Theorem ceval_deterministic: forall (c:com) st st1 st2 s1 s2,
@@ -236,7 +237,37 @@ Theorem ceval_deterministic: forall (c:com) st st1 st2 s1 s2,
      st =[ c ]=> st2 / s2 ->
      st1 = st2 /\ s1 = s2.
 Proof.
-    (* FILL IN HERE *) Admitted. 
+
+
+  intros.
+  generalize dependent st1.
+  generalize dependent s1.
+  induction H0; intros. 
+  - try (inversion H; auto).
+  - try (inversion H; auto). 
+  - inversion H. inversion H0. subst. auto.
+  - inversion H; subst. 
+    + specialize (IHceval1 _ _ H2). destruct IHceval1. subst. auto. 
+    + specialize (IHceval1 _ _ H5). destruct IHceval1. subst. discriminate H1.
+  - inversion H; subst. 
+    + specialize (IHceval _ _ H3). destruct IHceval. discriminate H2.
+    + specialize (IHceval _ _ H6). destruct IHceval. auto.
+  - inversion H1; subst.
+    + specialize (IHceval _ _ H9). destruct IHceval. subst. auto.
+    + rewrite H in H8. discriminate H8.
+  - inversion H1; subst.
+    + rewrite H in H8. discriminate H8.
+    + specialize (IHceval _ _ H9). destruct IHceval. subst. auto.
+  - inversion H; subst.
+    + specialize (IHceval1 _ _ H1). destruct IHceval1. subst. auto. 
+    + specialize (IHceval1 _ _ H1). destruct IHceval1. discriminate H2.
+  - inversion H; subst.
+    + specialize (IHceval _ _ H2). destruct IHceval. discriminate H4.
+    +  specialize (IHceval _ _ H2). destruct IHceval. subst. auto. 
+  (* try (split; inversion H; inversion H0; subst; auto; discriminate).
+  - destruct s1; destruct s2; split ;auto.
+  +   *)
+Qed.
 
 
 (** [] *)
