@@ -222,7 +222,11 @@ Theorem while_break_true : forall c st st',
   st =[ loop c endloop ]=> st' / SContinue ->
   exists st'', st'' =[ c ]=> st' / SBreak.
 Proof.
-    (* FILL IN HERE *) Admitted. 
+  intros.
+  remember <{loop c endloop}> as p.
+  induction H; try discriminate; auto.
+  - inversion Heqp. subst. exists st. apply H. 
+Qed.
 
 (** [] *)
 
