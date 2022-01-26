@@ -197,21 +197,23 @@ Proof.
   inversion H; subst; apply E_Loop_Break; assumption.
 Qed.
 
-
-
 Theorem seq_continue : forall c1 c2 st st' st'',
   st =[ c1 ]=> st' / SContinue ->
   st' =[ c2 ]=> st'' / SContinue ->
   st =[ c1 ; c2 ]=> st'' / SContinue.
 Proof.
-    (* FILL IN HERE *) Admitted. 
+  intros.
+  apply (E_Seq_Continue c1 c2 st st'); assumption.
+Qed.
 
 
 Theorem seq_stops_on_break : forall c1 c2 st st',
   st =[ c1 ]=> st' / SBreak ->
   st =[ c1 ; c2 ]=> st' / SBreak.
 Proof.
-    (* FILL IN HERE *) Admitted. 
+  intros.
+  eapply E_Seq_Break. assumption.
+Qed.
 
 (** [] *)
 
