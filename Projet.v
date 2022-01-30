@@ -363,9 +363,15 @@ Fixpoint beval_lazy (st : state) (b : bexp) : bool :=
     | <{a1 = a2}>   => (aeval st a1) =? (aeval st a2)
     | <{a1 <= a2}>  => (aeval st a1) <=? (aeval st a2)
     | <{~ b1}>      => negb (beval_lazy st b1)
-    | <{b1 && b2}>  => if negb (beval_lazy  st b1) then false else
-                         (beval_lazy  st b2)
+    | <{b1 && b2}>  => if (beval_lazy st b1) then (beval_lazy st b2) else
+                         false
     end.
 
 
+Theorem equiv_beval_lazy: forall (st : state) (b : bexp),
+    beval st b = beval_lazy st b.
+Proof.
+    intros.
+    induction b; trivial.
+Qed.
 
