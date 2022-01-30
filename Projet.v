@@ -237,8 +237,6 @@ Theorem ceval_deterministic: forall (c:com) st st1 st2 s1 s2,
      st =[ c ]=> st2 / s2 ->
      st1 = st2 /\ s1 = s2.
 Proof.
-
-
   intros.
   generalize dependent st1.
   generalize dependent s1.
@@ -264,13 +262,9 @@ Proof.
   - inversion H; subst.
     + specialize (IHceval _ _ H2). destruct IHceval. discriminate H4.
     +  specialize (IHceval _ _ H2). destruct IHceval. subst. auto. 
-  (* try (split; inversion H; inversion H0; subst; auto; discriminate).
-  - destruct s1; destruct s2; split ;auto.
-  +   *)
 Qed.
 
 
-(** [] *)
 End BreakImp.
 
 (* From now on regular Imp has a nice syntax, but not the variant with loop and break. *)
@@ -286,6 +280,39 @@ Fixpoint traduct_while (pw: Imp.com): BreakImp.com :=
       BreakImp.CLoop (BreakImp.CIf b (traduct_while c) BreakImp.CBreak)
   end.
 
+
+
+  (* Inductive ceval : com -> state -> result -> state -> Prop :=
+  | E_Skip : forall st,
+      st =[CSkip]=> st / SContinue
+  | E_Break : forall st,
+      st =[CBreak]=> st / SBreak
+  | E_Asgn  : forall st a n x,
+      aeval st a = n ->
+      st =[ x := a ]=> (x !-> n ; st) / SContinue
+  | E_Seq_Continue : forall c1 c2 st st' st'' s',
+      st  =[ c1 ]=> st' / SContinue ->
+      st' =[ c2 ]=> st'' / s'->
+      st  =[ c1 ; c2 ]=> st'' / s'
+  | E_Seq_Break : forall c1 c2 st st',
+      st  =[ c1 ]=> st' / SBreak ->
+      st  =[ c1 ; c2 ]=> st' / SBreak
+  | E_IfTrue : forall st st' s' b c1 c2,
+      beval st b = true ->
+      st =[ c1 ]=> st' / s'->
+      st =[ if b then c1 else c2 end]=> st' / s'
+  | E_IfFalse : forall st st' s' b c1 c2,
+      beval st b = false ->
+      st =[ c2 ]=> st' / s'->
+      st =[ if b then c1 else c2 end]=> st' / s'
+  | E_Loop_Continue : forall st st' st'' s' c,
+      st =[c]=> st' / SContinue->
+      st' =[ loop c endloop ]=> st'' / s' ->
+      st  =[ loop c endloop ]=> st'' / s'
+  | E_Loop_Break : forall st st' c,
+      st =[c]=> st' / SBreak->
+      st =[ loop c endloop ]=> st' / SContinue *)
+
 (* Now let us prove that we can simulate a regular imp program with a
    simple translated program in the variant. *)
 Theorem equiv_while_loopbreak: forall (c:Imp.com)(c':BreakImp.com) st st1,
@@ -293,7 +320,21 @@ Theorem equiv_while_loopbreak: forall (c:Imp.com)(c':BreakImp.com) st st1,
       (st =[ c ]=> st1) ->
       BreakImp.ceval c' st BreakImp.SContinue st1.
 Proof.
-    (* FILL IN HERE *) Admitted. 
+Admitted. 
+    (* intros.    
+    induction H0.
+    - simpl in H. subst. apply BreakImp.E_Skip.
+    - simpl in H. subst. apply BreakImp.E_Asgn. reflexivity.
+    - admit. 
+    - simpl in H. subst. apply (BreakImp.E_IfTrue).
+        + assumption.
+        + inversion H1.
+        * simpl in *. apply BreakImp.E_Skip.
+        * simpl in *. apply BreakImp.E_Asgn. assumption.
+        * simpl in *. subst. 
+    Qed.*)
+        
+  
 
 
 
@@ -315,6 +356,16 @@ Proof.
     would _not_ be equivalent to the original, since it would make more
     programs terminate.) *)
 
-(* FILL IN HERE
+Fixpoint beval_lazy (st : state) (b : bexp) : bool :=
+    match b with
+    | <{true}>      => true
+    | <{false}>     => false
+    | <{a1 = a2}>   => (aeval st a1) =? (aeval st a2)
+    | <{a1 <= a2}>  => (aeval st a1) <=? (aeval st a2)
+    | <{~ b1}>      => negb (beval_lazy st b1)
+    | <{b1 && b2}>  => if negb (beval_lazy  st b1) then false else
+                         (beval_lazy  st b2)
+    end.
 
-    [] *)
+
+
