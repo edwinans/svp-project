@@ -1,4 +1,6 @@
 
+(* Projet SVP - Edwin ANSARI *)
+
 Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
 From Coq Require Import Bool.Bool.
 From Coq Require Import Init.Nat.
@@ -8,6 +10,7 @@ From Coq Require Import Lia.
 From Coq Require Import Lists.List. Import ListNotations.
 From Coq Require Import Strings.String.
 From PLF Require Import Maps Imp.
+
 
 Module BreakImp.
 (** **** Exercise: 4 stars, advanced (break_imp)
@@ -227,7 +230,7 @@ Proof.
   intros.
   remember <{loop c endloop}> as p.      
   induction H; try discriminate; auto.
-  - inversion Heqp. subst. exists st. apply H. 
+  - inversion Heqp. subst. exists st. assumption. 
 Qed.
 
 
@@ -281,38 +284,6 @@ Fixpoint traduct_while (pw: Imp.com): BreakImp.com :=
   end.
 
 
-
-  (* Inductive ceval : com -> state -> result -> state -> Prop :=
-  | E_Skip : forall st,
-      st =[CSkip]=> st / SContinue
-  | E_Break : forall st,
-      st =[CBreak]=> st / SBreak
-  | E_Asgn  : forall st a n x,
-      aeval st a = n ->
-      st =[ x := a ]=> (x !-> n ; st) / SContinue
-  | E_Seq_Continue : forall c1 c2 st st' st'' s',
-      st  =[ c1 ]=> st' / SContinue ->
-      st' =[ c2 ]=> st'' / s'->
-      st  =[ c1 ; c2 ]=> st'' / s'
-  | E_Seq_Break : forall c1 c2 st st',
-      st  =[ c1 ]=> st' / SBreak ->
-      st  =[ c1 ; c2 ]=> st' / SBreak
-  | E_IfTrue : forall st st' s' b c1 c2,
-      beval st b = true ->
-      st =[ c1 ]=> st' / s'->
-      st =[ if b then c1 else c2 end]=> st' / s'
-  | E_IfFalse : forall st st' s' b c1 c2,
-      beval st b = false ->
-      st =[ c2 ]=> st' / s'->
-      st =[ if b then c1 else c2 end]=> st' / s'
-  | E_Loop_Continue : forall st st' st'' s' c,
-      st =[c]=> st' / SContinue->
-      st' =[ loop c endloop ]=> st'' / s' ->
-      st  =[ loop c endloop ]=> st'' / s'
-  | E_Loop_Break : forall st st' c,
-      st =[c]=> st' / SBreak->
-      st =[ loop c endloop ]=> st' / SContinue *)
-
 (* Now let us prove that we can simulate a regular imp program with a
    simple translated program in the variant. *)
 Theorem equiv_while_loopbreak: forall (c:Imp.com)(c':BreakImp.com) st st1,
@@ -320,8 +291,7 @@ Theorem equiv_while_loopbreak: forall (c:Imp.com)(c':BreakImp.com) st st1,
       (st =[ c ]=> st1) ->
       BreakImp.ceval c' st BreakImp.SContinue st1.
 Proof.
-Admitted. 
-    (* intros.    
+    intros.    
     induction H0.
     - simpl in H. subst. apply BreakImp.E_Skip.
     - simpl in H. subst. apply BreakImp.E_Asgn. reflexivity.
@@ -331,12 +301,10 @@ Admitted.
         + inversion H1.
         * simpl in *. apply BreakImp.E_Skip.
         * simpl in *. apply BreakImp.E_Asgn. assumption.
-        * simpl in *. subst. 
-    Qed.*)
+        * simpl in *. subst.
+    Admitted.
         
   
-
-
 
 
 (** **** BONUS Exercise: 3 stars, standard, optional (short_circuit)
@@ -363,8 +331,7 @@ Fixpoint beval_lazy (st : state) (b : bexp) : bool :=
     | <{a1 = a2}>   => (aeval st a1) =? (aeval st a2)
     | <{a1 <= a2}>  => (aeval st a1) <=? (aeval st a2)
     | <{~ b1}>      => negb (beval_lazy st b1)
-    | <{b1 && b2}>  => if (beval_lazy st b1) then (beval_lazy st b2) else
-                         false
+    | <{b1 && b2}>  => if (beval_lazy st b1) then (beval_lazy st b2) else false
     end.
 
 
@@ -374,4 +341,3 @@ Proof.
     intros.
     induction b; trivial.
 Qed.
-
